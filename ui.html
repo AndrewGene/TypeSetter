@@ -9,7 +9,7 @@
 </div>
 <div id='current-view' class="content-view">
   <div class='rule-list'>
-    <!-- <div class='rule'>
+    <div class='rule'>
     <div class='rule-header'>
       <h4>Headline (32-72px)</h4>
       <input type='button' class="cta-link" value='Edit'/><img src='https://figmacompliments.blob.core.windows.net/figmablob/pencil.png' alt='edit'/>
@@ -32,7 +32,7 @@
           <br/>
           <span class='font' style='font-family: Voltage;'>Voltage</span>
         </div>
-      </div> -->
+      </div>
   </div>  
       <input id='btn-new-rule' type='button' class='cta-minor' value="+ Add New Rule"/>
       <input id='btn-apply-settings' type='button' class="cta-major" value="Apply Type Settings">
@@ -390,7 +390,8 @@
           $("#font-preview").val(rule.exampleText);
           $("#txt-min-size").val(rule.minFontSize);
           $("#txt-max-size").val(rule.maxFontSize);
-          $("#txt-color").val(rule.fontColorHex);          
+          $("#txt-color").val(rule.fontColorHex);    
+          $("#text-color-holder .font-swatch").css("background",rule.fontColorHex);          
         }
       });
       $("#btn-apply-settings").click(function(){
@@ -416,8 +417,8 @@
         var fontArray = fontString.split("|");
         var fontFamily = fontArray[0];
         var fontStyle = fontArray[1];
-        var minFontSize = parseInt($("#txt-min-size").val());
-        var maxFontSize = parseInt($("#txt-max-size").val());
+        var minFontSize = $("#txt-min-size").val().length > 0 ? ($("#txt-min-size").val()) : null;
+        var maxFontSize = $("#txt-max-size").val().length > 0 ? parseInt($("#txt-max-size").val()) : null;
         var fontColorHex = $("#txt-color").val().startsWith("#") ? $("#txt-color").val() : ("#" + $("#txt-color").val());
         //convert hex to rgb
         var hex = tinycolor(fontColorHex);
@@ -506,6 +507,11 @@
         $("#current-view").show();
         $("#new-view").hide();
       });
+
+      $("#txt-color").keyup(function(){
+          var colorHex = tinycolor($(this).val());
+          $("#text-color-holder .font-swatch").css("background",colorHex.toHexString());
+      });
   });
 
   function resetNewForm(){
@@ -541,9 +547,14 @@
             html += rule.maxFontSize;
           }
         }
-        html += "px";
+        if(rule.minFontSize !== null || rule.maxFontSize !== null){
+          html += "px";
+        }
         if(rule.fontColorHex !== null){
-          html += ", <div class='font-swatch' style='background:" + rule.fontColorHex + ";'></div> )</h4>";
+          if(rule.minFontSize !== null || rule.maxFontSize !== null){
+            html += ",";
+          }
+          html += " <div class='font-swatch' style='background:" + rule.fontColorHex + ";'></div> )</h4>";
         }
         else{
           html += ")</h4>";
@@ -552,8 +563,14 @@
         html += "<br/>";
         html += "<span class='font' style='font-family:" + rule.fontFamily + ";";
         html += " font-weight:" + rule.fontStyle + ";";
+        if(rule.fontColorHex !== null){
+          html += " color:" + rule.fontColorHex + ";";
+          if(isTooLightYIQ(rule.fontColorHex)){
+            html += " background: #000; padding:4px; border-radius:5px;";
+          }
+        }
         html += "'>" + rule.fontFamily;
-        html += " " + rule.fontStyle;
+        html += " " + rule.fontStyle;        
         html += "</span>";
         html += "</div></div>";
         $("#current-view .rule-list").append(html);
@@ -577,22 +594,43 @@
             html += rule.maxFontSize;
           }
         }
-        html += "px";
+        if(rule.minFontSize !== null || rule.maxFontSize !== null){
+          html += "px";
+        }
         if(rule.fontColorHex !== null){
-          html += ", <div class='font-swatch' style='background:" + rule.fontColorHex + ";'></div> )</h4>";
+          if(rule.minFontSize !== null || rule.maxFontSize !== null){
+            html += ",";
+          }
+          html += " <div class='font-swatch' style='background:" + rule.fontColorHex + ";'></div> )</h4>";
         }
         else{
           html += ")</h4>";
-        }        
+        }    
         html += "<br/>";
         html += "<span class='font' style='font-family:" + rule.fontFamily + ";";
         html += " font-weight:" + rule.fontStyle + ";";
+        if(rule.fontColorHex !== null){          
+          html += " color:" + rule.fontColorHex + ";";
+          if(isTooLightYIQ(rule.fontColorHex)){
+            html += " background: #000; padding:4px; border-radius:5px;";
+          }
+        }
         html += "'>" + rule.exampleText;
         html += "</span>";
         html += "</div></div>";
         $("#preview-view .rule-list").append(html);
     });
   }
+
+  function isTooLightYIQ(hexcolor){
+  hexcolor = tinycolor(hexcolor).toHexString().replace("#","");
+  console.log("is it too light?" ,hexcolor);
+  var r = parseInt(hexcolor.substr(0,2),16);
+  var g = parseInt(hexcolor.substr(2,2),16);
+  var b = parseInt(hexcolor.substr(4,2),16);
+  var yiq = ((r*299)+(g*587)+(b*114))/1000;
+  return yiq >= 128;
+}
 
   function loadFontOptions(){
     var html = "";

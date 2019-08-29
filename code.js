@@ -92,9 +92,9 @@ figma.ui.onmessage = (msg) => __awaiter(this, void 0, void 0, function* () {
                 }
                 if (rule.fontColor !== null) {
                     var foundColorArray = fills.filter(function (fill) {
-                        if ((Math.abs(fill.color.r - rule.fontColor.r) < 0.0000001) && (Math.abs(fill.color.g - rule.fontColor.g) < 0.0000001) && (Math.abs(fill.color.b - rule.fontColor.b) < 0.0000001)) {
+                        if ((Math.abs(fill.color.r - rule.fontColor.r) < 0.002) && (Math.abs(fill.color.g - rule.fontColor.g) < 0.002) && (Math.abs(fill.color.b - rule.fontColor.b) < 0.002)) {
                             //close enough, tinyColor lib isn't perfect
-                            //console.log("node: " + textNode.name + " matches color from rule", rule.ruleName);
+                            console.log("node: " + textNode.name + " matches color from rule", rule.ruleName);
                             return true;
                         }
                         else {
@@ -109,7 +109,7 @@ figma.ui.onmessage = (msg) => __awaiter(this, void 0, void 0, function* () {
                     var fontName = { family: rule.fontFamily, style: rule.fontStyle };
                     var font = yield figma.loadFontAsync(fontName);
                     textNode.fontName = fontName;
-                    //console.log("setting node: " + textNode.name + " to rule: " + rule.ruleName);
+                    console.log("setting node: " + textNode.name + " to rule: " + rule.ruleName);
                     break;
                 }
             }

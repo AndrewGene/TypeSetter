@@ -323,7 +323,7 @@
 
   #tabs .selected{
     font-weight: bold;
-    opacity: 1;
+    opacity: 1;    
   }
 </style>
 <script
@@ -357,6 +357,7 @@
       });
       $("#btn-apply-settings").click(function(){
         var rule1 = {
+          ruleName:'Body Copy',
           minFontSize:12,
           maxFontSize:18,
           fontColor:null, //rgb
@@ -383,11 +384,67 @@
 
   function loadFontOptions(){
     var html = "";
+    var cleanedFontList = [];
+    for(let i = 0; i < fonts.length; i++) {
+        if (fonts[i] && !fonts[i].fontName.family.startsWith('.')) {
+            if (((i > 0 && fonts[i].fontName.family !== fonts[i-1].fontName.family) || i==0)) {
+                cleanedFontList.push(fonts[i]);                
+            }
+        } else {
+            fonts.splice(i, 1);
+            i++;
+        }
+    }
+
+    var detectedAndCleanedFonts = cleanedFontList.filter(function(font){
+      return detectFont(font.fontName.family);
+    });
+
+    fonts = detectedAndCleanedFonts;
+
     $.each(fonts, function(index, font){
       console.log(font);
       html += "<option value='" + font.fontName.family + "|" + font.fontName.style + "'>" + font.fontName.family + " - " + font.fontName.style + "</option>";
     });
     $("#sel-font").html(html);
+  }
+
+  /* Figma returns bunch of unnecessary/weird system fonts that don't render in browser.
+  * Hence this following font detection piece to eliminate those fonts
+  * https://github.com/alanhogan/bookmarklets/blob/master/font-stack-guess.js
+  */
+
+  // Using m or w because these two characters take up the maximum width.
+  // And a LLi so that the same matching fonts can get separated
+  let testString = "mmmmmmmmmmlli";
+
+  //Testing using 72px font size. I guess larger the better.
+  let testSize = '72px';
+  let defaultWidth = 0;
+  let defaultHeight = 0;
+
+  let body = document.getElementsByTagName("body")[0];
+
+  // create a SPAN in the document to get the width of the text we use to test
+  let s = document.createElement("span");
+  s.style.fontSize = testSize;
+  s.style.visibility = 'hidden';
+  s.innerHTML = testString;
+  s.style.fontFamily = 'serif';
+  body.appendChild(s);
+  defaultWidth = s.offsetWidth;
+  defaultHeight = s.offsetHeight;
+
+  /* Function which adds a text layer, calculates the width with defaul ones to
+  * detect wether browser has the font installed or not
+  */
+  const detectFont = (font) =>{
+      let detected = false;
+      s.style.fontFamily = '"' + font + '"' + ',' + 'serif';
+      let matched = (s.offsetWidth != defaultWidth || s.offsetHeight != defaultHeight);
+      detected = detected || matched;
+      // console.log(font + " : " + detected);
+      return detected;
   }
 
   onmessage = (event) => {  

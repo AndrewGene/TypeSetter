@@ -1,0 +1,402 @@
+<div id='tabs'>
+<span id='current' class='selected'>Current</span>
+<span id='preview'>Preview</span>
+<span id='popular'>Popular</span>
+</div>
+<hr style='clear:left; position: fixed; top:41px; left:0px; width:100%; color:#333; height:0.5px;'/>
+<div id='current-view' class="content-view">
+  <div class='rule'>
+    <div class='rule-header'>
+      <h4>Headline (32-72px)</h4>
+      <input type='button' class="cta-link" value='Edit'/><img src='https://figmacompliments.blob.core.windows.net/figmablob/pencil.png' alt='edit'/>
+      <br/>
+      <span class='font' style='font-family:Roboto; font-weight: bold;'>Roboto Bold</span>
+    </div>
+  </div>
+  <div class='rule'>
+      <div class='rule-header'>
+        <h4>Copy (12-24px)</h4>
+        <input type='button' class="cta-link" value='Edit'/><img src='https://figmacompliments.blob.core.windows.net/figmablob/pencil.png' alt='edit'/>
+        <br/>
+        <span class='font' style='font-family:Roboto; font-weight: lighter;'>Roboto Light</span>
+      </div>
+    </div>
+    <div class='rule'>
+        <div class='rule-header'>
+          <h4>Accent ( <div class='font-swatch' style='background:#461DBC;'></div> )</h4>
+          <input type='button' class="cta-link" value='Edit'/><img src='https://figmacompliments.blob.core.windows.net/figmablob/pencil.png' alt='edit'/>
+          <br/>
+          <span class='font' style='font-family: Voltage;'>Voltage</span>
+        </div>
+      </div>
+      <input id='btn-new-rule' type='button' class='cta-minor' value="+ Add New Rule"/>
+      <input id='btn-apply-settings' type='button' class="cta-major" value="Apply Type Settings">
+</div>
+<div id='new-view' class="content-view">
+  <input id='txt-rule-name' type='text' placeholder="rule name"/>
+  <input type='button' class="cta-link red-text" value='Cancel'/>
+  <select id='sel-font'>
+    <option value="Roboto Bold">Roboto Bold</option>
+    <option value="Arial Rounded MT Bold">Arial Rounded MT Bold</option>
+  </select> 
+  <textarea id='font-preview' class='font' style='font-family:Roboto; font-weight: bold; font-size: 32px;'>WE LANDED ON THE MOON!</textarea>
+  <h4>
+    Size Range
+  </h4>
+  <input id='txt-min-size' type='text'/> - <input id='txt-max-size' type='text'/> px
+  <h4>
+    Text color
+  </h4>
+  <div id='text-color-holder'>
+      <div class='font-swatch' style='background:#461DBC;'></div> 
+    <input id='txt-color' type='text'/>
+  </div>
+  <input type='button' class="cta-major" value="Save Rule">
+</div>
+<div id='preview-view' class="content-view">
+    <div class='rule'>
+        <div class='rule-header'>
+          <h4>Headline (32-72px)</h4>          
+          <br/>
+          <span class='font' style='font-family:Roboto; font-weight: bold; font-size: 32px;'>WE LANDED ON THE MOON!</span>
+        </div>
+      </div>
+      <div class='rule'>
+          <div class='rule-header'>
+            <h4>Copy (12-24px)</h4>            
+            <br/>
+            <span class='font' style='font-family:Roboto; font-weight: lighter; font-size:16px;'>The moon landing was a momentus occasion.  People all accros the country were glued to their televevision sets.</span>
+          </div>
+        </div>
+        <div class='rule'>
+            <div class='rule-header'>
+              <h4>Accent ( <div class='font-swatch' style='background:#461DBC;'></div> )</h4>              
+              <br/>
+              <span class='font' style='font-family: Voltage; color:#461DBC; font-size:16px;'>Explore the space shuttle</span>
+            </div>
+          </div>
+</div>
+<div id='popular-view' class="content-view">
+    <div class='rules-entry'>
+      <div class="select-entry"></div>
+      <ul>
+        <li style='font-weight: bold;'>Roboto Bold</li>
+        <li style='font-weight: lighter;'>Roboto Light</li>
+        <li style='font-weight:200;'>Voltage</li>
+      </ul>
+    </div>
+    <div class='rules-entry'>
+        <div class="select-entry"></div>
+        <ul>
+          <li style='font-weight: bold;'>Futura Bold</li>
+          <li style='font-weight: lighter;'>Antenna Cond</li>
+          <li style='font-weight:200;'>Voltage</li>
+        </ul>
+      </div>
+      <div class='rules-entry'>
+          <div class="select-entry"></div>
+          <ul>
+            <li style='font-weight: bold;'>Roboto Bold</li>
+            <li style='font-weight: lighter;'>Droid Sans</li>
+            <li style='font-weight:200;'>Arial Rounded MT Bold</li>
+          </ul>
+        </div>
+        <div class='rules-entry'>
+            <div class="select-entry"></div>
+            <ul>
+              <li style='font-weight: bold;'>Avenir Heavy</li>
+              <li style='font-weight: lighter;'>Avenir Light</li>
+              <li style='font-weight:200;'>Coustard</li>
+            </ul>
+          </div>
+          <input type='button' class="cta-major" value="Set Fonts">
+</div>
+<style>
+  body{
+    font-family: sans-serif;
+  }
+  #new-view{
+    padding-left:20px;
+  }
+  #new-view input{
+    display: block;
+  }
+  #new-view input[type=text]{
+    height:38px;
+    font-size:18px;
+    padding:3px;
+    border-radius: 5px;
+    outline: none;
+    border: 0.5px solid #BCBCBC;
+  }
+  #new-view h4{
+    margin-bottom:5px;
+  }
+  #new-view select{
+    margin:20px 0px;
+    height:38px;
+    padding:3px;
+    width:80%;
+    font-size: 18px;
+    display: block;
+  }
+  #new-view .font{
+    display: block;
+    position: relative;
+    top:auto;
+    left:auto;
+    width:90%;
+    height:90px;
+    border:none;
+    outline: none;
+    padding:10px;
+    background:#f7f7f7;
+    border-radius:10px;
+    margin-left:0px;
+  }
+  #txt-min-size, #txt-max-size{
+    width:60px;    
+    text-align: center;
+    display: inline-block !important;
+    padding:0px;
+  }
+  #txt-color{
+    padding-left:36px !important;
+    width:115px;
+  }
+  #text-color-holder{
+    position: relative;
+  }
+  #text-color-holder .font-swatch{
+    position: absolute;
+    top:12px;
+    left:10px;
+  }
+  .red-text{
+    color:#f00;
+  }
+  .rules-entry{
+    position: relative;
+    height:90px;
+  }
+  .select-entry{
+    position: absolute;
+    top:50%;
+    margin-top:-18px;
+    width: 25px;
+    height:25px;
+    background:#c4c4c4;
+    border-radius: 50%;
+    left:20px;
+  }
+  .rules-entry ul{
+    list-style-type: none;
+    margin-left:40px;
+  }
+  .rules-entry li{
+    height:24px;
+    line-height: 24px;
+    margin-bottom: 2px; 
+  }
+  h2{
+    text-align: center;
+  }
+  .content-view{
+    display:none;
+    position: relative;
+    padding-bottom:90px;
+    padding-top:65px;
+    z-index: 1;
+  }
+  #current-view{
+    display: block;
+  }
+  .rule{
+    position: relative;
+    margin-bottom:50px;
+  }
+  /*#preview-view .rule{
+    margin-bottom:50px;
+  }*/
+  .rule h4{
+    display:inline-block;
+    position: absolute;
+    top:5px;
+    left:10px;
+    font-weight: normal;
+    margin:0px;
+  }
+  .rule .cta-link{
+    top:5px;
+  }
+  .cta-link {
+    font-size: small;    
+    position:absolute;
+    top:55px;
+    right:20px;
+    background:none;
+    outline:none;
+    border-width: 0px;
+  }
+
+  .cta-link:hover{
+    cursor: pointer;
+  }
+
+  .rule-header img{
+    position:absolute;
+    top:7px;
+    right:5px;
+    width:14px;
+    display:inline-block;
+  }
+
+  .font{
+    position: relative;
+    top:15px;
+    margin-left:30px;
+  }
+
+  
+  .cta-minor{
+    text-decoration: underline;
+    background:none;
+    outline:none;
+    border-width: 0px;
+    font-size:18px;
+    font-weight: bold;
+  }
+  .cta-major{
+    background:#000;
+    border-radius:5px;
+    height:45px;
+    color:#fff;
+    font-weight: bold;
+    font-size:18px;
+    display: block;
+    padding: 0px 30px;
+    width:80%;
+    position: fixed;
+    bottom:20px;
+    left:50%;
+    margin-left: -40%;
+  }
+  .font-swatch{
+    display: inline-block;
+    border-radius:5px;
+    width:14px;
+    height:14px;
+    position: relative;
+    top:3px;
+  }
+
+  #btn-new-rule{
+    margin:0px 0px 20px 20px;
+  }
+
+  #tabs{
+    position: fixed;
+    top:0px;
+    left:0px;
+    width:100%;
+    z-index: 50000 !important;
+    background:#fff;
+  }
+
+  #tabs span{
+    width:33%;
+    text-align: center;
+    float:left;
+    display: block;    
+    font-size:18px;   
+    opacity: 0.4;
+    background:#fff;
+    height:51px;
+    margin:0px;
+    padding:0px;
+    line-height: 51px;
+  }
+
+  #tabs span:hover{
+    cursor: pointer;
+  }
+
+  #tabs .selected{
+    font-weight: bold;
+    opacity: 1;
+  }
+</style>
+<script
+  src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+  crossorigin="anonymous"></script>
+<script>
+  var fonts = [];
+  var rules = [];
+
+  $(function(){
+
+      var message = { pluginMessage: { type: "COMMAND.GET_FONTS", rules:rules } };
+      console.log("*ACTION*", message);
+      parent.postMessage(message, '*');
+
+      $("#tabs span").click(function(){
+          var id = $(this).attr("id");
+          $(".content-view").hide();
+          $("#tabs span").removeClass("selected");
+          $("#" + id + "-view").show();
+          $(this).addClass("selected");
+      });
+      $("#btn-new-rule").click(function(){
+        $("#current-view").hide();
+        $("#new-view").show();
+      });
+      $("#current-view .cta-link").click(function(){
+        $("#current-view").hide();
+        $("#new-view").show();
+      });
+      $("#btn-apply-settings").click(function(){
+        var rule1 = {
+          minFontSize:12,
+          maxFontSize:18,
+          fontColor:null, //rgb
+          fontFamily:'Roboto',
+          fontStyle:'Light'
+        };
+        rules.push(rule1);
+
+        var message = { pluginMessage: { type: "COMMAND.SET_TYPE", rules:rules } };
+        console.log("*ACTION*", message);
+        parent.postMessage(message, '*');
+      });
+      $("#new-view .cta-link").click(function(){
+        $("#current-view").show();
+        $("#new-view").hide();
+      });
+      $("#sel-font").change(function(){
+          var fontString = $(this).val();
+          var fontArray = fontString.split("|");
+          $("#font-preview").css("font-family",fontArray[0]);
+          $("#font-preview").css("font-weight",fontArray[1]);
+      });
+  });
+
+  function loadFontOptions(){
+    var html = "";
+    $.each(fonts, function(index, font){
+      console.log(font);
+      html += "<option value='" + font.fontName.family + "|" + font.fontName.style + "'>" + font.fontName.family + " - " + font.fontName.style + "</option>";
+    });
+    $("#sel-font").html(html);
+  }
+
+  onmessage = (event) => {  
+  
+  console.log(event);
+  if(event.data.pluginMessage !== undefined){
+    fonts = event.data.pluginMessage;
+    loadFontOptions();
+  }
+  
+}
+</script>

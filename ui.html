@@ -4,8 +4,12 @@
 <span id='popular'>Popular</span>
 </div>
 <hr style='clear:left; position: fixed; top:41px; left:0px; width:100%; color:#333; height:0.5px;'/>
+<div id='loading-fonts'>
+  <span>Loading ALL your fonts...</span>
+</div>
 <div id='current-view' class="content-view">
-  <div class='rule'>
+  <div class='rule-list'>
+    <!-- <div class='rule'>
     <div class='rule-header'>
       <h4>Headline (32-72px)</h4>
       <input type='button' class="cta-link" value='Edit'/><img src='https://figmacompliments.blob.core.windows.net/figmablob/pencil.png' alt='edit'/>
@@ -28,7 +32,8 @@
           <br/>
           <span class='font' style='font-family: Voltage;'>Voltage</span>
         </div>
-      </div>
+      </div> -->
+  </div>  
       <input id='btn-new-rule' type='button' class='cta-minor' value="+ Add New Rule"/>
       <input id='btn-apply-settings' type='button' class="cta-major" value="Apply Type Settings">
 </div>
@@ -51,9 +56,11 @@
       <div class='font-swatch' style='background:#461DBC;'></div> 
     <input id='txt-color' type='text'/>
   </div>
-  <input type='button' class="cta-major" value="Save Rule">
+  <input id='btn-delete-rule' type='button' class="cta-minor red-text" value="Delete Rule">
+  <input id='btn-save-rule' type='button' class="cta-major" value="Save Rule">
 </div>
 <div id='preview-view' class="content-view">
+  <div class='rule-list'>
     <div class='rule'>
         <div class='rule-header'>
           <h4>Headline (32-72px)</h4>          
@@ -75,6 +82,8 @@
               <span class='font' style='font-family: Voltage; color:#461DBC; font-size:16px;'>Explore the space shuttle</span>
             </div>
           </div>
+  </div>
+    
 </div>
 <div id='popular-view' class="content-view">
     <div class='rules-entry'>
@@ -112,6 +121,13 @@
           <input type='button' class="cta-major" value="Set Fonts">
 </div>
 <style>
+  #btn-delete-rule{
+    margin-top:20px;
+  }
+  #loading-fonts{
+    position:relative; 
+    top:60px;
+  }
   body{
     font-family: sans-serif;
   }
@@ -208,9 +224,9 @@
     padding-top:65px;
     z-index: 1;
   }
-  #current-view{
+  /*#current-view{
     display: block;
-  }
+  }*/
   .rule{
     position: relative;
     margin-bottom:50px;
@@ -288,6 +304,7 @@
     height:14px;
     position: relative;
     top:3px;
+    border:0.5px solid #333;
   }
 
   #btn-new-rule{
@@ -330,6 +347,7 @@
   src="https://code.jquery.com/jquery-3.4.1.min.js"
   integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
   crossorigin="anonymous"></script>
+  <script src='https://figmacompliments.blob.core.windows.net/figmablob/tinycolor.js'></script>
 <script>
   var fonts = [];
   var rules = [];
@@ -337,6 +355,10 @@
   $(function(){
 
       var message = { pluginMessage: { type: "COMMAND.GET_FONTS", rules:rules } };
+      console.log("*ACTION*", message);
+      parent.postMessage(message, '*');
+
+      message = { pluginMessage: { type: "COMMAND.GET_RULES", rules:rules } };
       console.log("*ACTION*", message);
       parent.postMessage(message, '*');
 
@@ -351,21 +373,27 @@
         $("#current-view").hide();
         $("#new-view").show();
       });
-      $("#current-view .cta-link").click(function(){
+      $(document).on("click","#current-view .cta-link",function(){
         $("#current-view").hide();
         $("#new-view").show();
+
+        var ruleId = $(this).data("id");
+        var ruleArray = rules.filter(function(rule){
+          return rule.id === ruleId
+        });
+        if(ruleArray.length === 1){
+          var rule = ruleArray[0];
+          //load the "new-view" with the existing rule
+          $("#new-view").data("id", rule.id);
+          $("#txt-rule-name").val(rule.ruleName);
+          $("#sel-font").val(rule.fontFamily + "|" + rule.fontStyle);
+          $("#font-preview").val(rule.exampleText);
+          $("#txt-min-size").val(rule.minFontSize);
+          $("#txt-max-size").val(rule.maxFontSize);
+          $("#txt-color").val(rule.fontColorHex);          
+        }
       });
       $("#btn-apply-settings").click(function(){
-        var rule1 = {
-          ruleName:'Body Copy',
-          minFontSize:12,
-          maxFontSize:18,
-          fontColor:null, //rgb
-          fontFamily:'Roboto',
-          fontStyle:'Light'
-        };
-        rules.push(rule1);
-
         var message = { pluginMessage: { type: "COMMAND.SET_TYPE", rules:rules } };
         console.log("*ACTION*", message);
         parent.postMessage(message, '*');
@@ -373,6 +401,7 @@
       $("#new-view .cta-link").click(function(){
         $("#current-view").show();
         $("#new-view").hide();
+        resetNewForm();
       });
       $("#sel-font").change(function(){
           var fontString = $(this).val();
@@ -380,7 +409,190 @@
           $("#font-preview").css("font-family",fontArray[0]);
           $("#font-preview").css("font-weight",fontArray[1]);
       });
+      $("#btn-save-rule").click(function(){
+        var ruleName = $("#txt-rule-name").val();
+        var fontString = $("#sel-font").val();
+        var exampleText = $("#font-preview").val();
+        var fontArray = fontString.split("|");
+        var fontFamily = fontArray[0];
+        var fontStyle = fontArray[1];
+        var minFontSize = parseInt($("#txt-min-size").val());
+        var maxFontSize = parseInt($("#txt-max-size").val());
+        var fontColorHex = $("#txt-color").val().startsWith("#") ? $("#txt-color").val() : ("#" + $("#txt-color").val());
+        //convert hex to rgb
+        var hex = tinycolor(fontColorHex);
+        var rgb = hex.toRgb();
+        rgb.r /= 255;
+        rgb.g /= 255;
+        rgb.b /= 255;
+        delete rgb["a"];
+
+        var fontColor = rgb;
+
+        var editId = $("#new-view").data("id");
+        console.log("editId",editId);
+        if(editId === undefined || editId === null || editId === ""){
+          console.log("creating a new rule");
+        var rule1 = {
+            id: uuidv4(),
+            ruleName:ruleName,
+            minFontSize:minFontSize,
+            maxFontSize:maxFontSize,
+            fontColor:fontColorHex === "#" ? null : fontColor, //rgb
+            fontColorHex:fontColorHex === "#" ? null : fontColorHex,
+            fontFamily:fontFamily,
+            fontStyle:fontStyle,
+            exampleText: exampleText === "" ? "We landed on the moon!" : exampleText
+          };
+          rules.push(rule1);
+        }
+        else{
+          var editArray = rules.filter(function(rule){
+              return rule.id === editId
+          });
+          if(editArray.length === 1){            
+            var rule = editArray[0];
+            console.log("editing rule", ruleName);
+            rule.ruleName = ruleName;
+            rule.minFontSize = minFontSize;
+            rule.maxFontSize = maxFontSize;
+            rule.fontColor = fontColorHex === "#" ? null : fontColor; //rgb
+            rule.fontColorHex = fontColorHex === "#" ? null : fontColorHex;
+            rule.fontFamily = fontFamily;
+            rule.fontStyle = fontStyle;
+            rule.exampleText =  exampleText === "" ? "We landed on the moon!" : exampleText;
+          }
+          else{
+            console.log("editArray",editArray);
+          }
+        }
+
+        resetNewForm();
+
+        //save rules to pluginData?
+        var message = { pluginMessage: { type: "COMMAND.SAVE_RULES", rules:rules } };
+        console.log("*ACTION*", message);
+        parent.postMessage(message, '*');
+
+        renderRules();
+        renderExamples();
+
+        $("#current-view").show();
+        $("#new-view").hide();
+      });     
+      
+      $("#btn-delete-rule").click(function(){
+        var editId = $("#new-view").data("id");
+        if(editId !== undefined && editId !== null && editId !== ""){
+          var ruleIndex = -1;
+          $.each(rules, function(index,rule){
+              if(rule.id === editId){
+                ruleIndex = index;
+              }
+          });
+          var removed = rules.splice(ruleIndex,1);
+          console.log("removed rule", removed);
+
+          resetNewForm();
+
+          //save rules to pluginData?
+          var message = { pluginMessage: { type: "COMMAND.SAVE_RULES", rules:rules } };
+          console.log("*ACTION*", message);
+          parent.postMessage(message, '*');
+
+          renderRules();
+          renderExamples();
+        }
+        $("#current-view").show();
+        $("#new-view").hide();
+      });
   });
+
+  function resetNewForm(){
+    $("#new-view").data("id", "");
+    $("#txt-rule-name").val("");
+    $("#sel-font").val("");
+    $("#font-preview").val("");
+    $("#txt-min-size").val("");
+    $("#txt-max-size").val("");
+    $("#txt-color").val("");
+  }
+
+  function uuidv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+  function renderRules(){
+    $("#current-view .rule-list").html("");
+    $.each(rules, function(index, rule){
+        var html = "<div class='rule'><div class='rule-header'>";
+        html += "<h4>" + rule.ruleName + " (";
+        if(rule.minFontSize !== null){
+          html += rule.minFontSize;
+          if(rule.maxFontSize !== null && rule.minFontSize !== rule.maxFontSize){
+            html += "-" + rule.maxFontSize;
+          }
+        }
+        else{
+          if(rule.maxFontSize !== null){
+            html += rule.maxFontSize;
+          }
+        }
+        html += "px";
+        if(rule.fontColorHex !== null){
+          html += ", <div class='font-swatch' style='background:" + rule.fontColorHex + ";'></div> )</h4>";
+        }
+        else{
+          html += ")</h4>";
+        }
+        html += "<input type='button' class='cta-link' value='Edit' data-id='" + rule.id + "'/><img src='https://figmacompliments.blob.core.windows.net/figmablob/pencil.png' alt='edit'/>";
+        html += "<br/>";
+        html += "<span class='font' style='font-family:" + rule.fontFamily + ";";
+        html += " font-weight:" + rule.fontStyle + ";";
+        html += "'>" + rule.fontFamily;
+        html += " " + rule.fontStyle;
+        html += "</span>";
+        html += "</div></div>";
+        $("#current-view .rule-list").append(html);
+        console.log(html);
+    });
+  }
+
+  function renderExamples(){
+    $("#preview-view .rule-list").html("");
+    $.each(rules, function(index, rule){
+        var html = "<div class='rule'><div class='rule-header'>";
+        html += "<h4>" + rule.ruleName + " (";
+            if(rule.minFontSize !== null){
+          html += rule.minFontSize;
+          if(rule.maxFontSize !== null && rule.minFontSize !== rule.maxFontSize){
+            html += "-" + rule.maxFontSize;
+          }
+        }
+        else{
+          if(rule.maxFontSize !== null){
+            html += rule.maxFontSize;
+          }
+        }
+        html += "px";
+        if(rule.fontColorHex !== null){
+          html += ", <div class='font-swatch' style='background:" + rule.fontColorHex + ";'></div> )</h4>";
+        }
+        else{
+          html += ")</h4>";
+        }        
+        html += "<br/>";
+        html += "<span class='font' style='font-family:" + rule.fontFamily + ";";
+        html += " font-weight:" + rule.fontStyle + ";";
+        html += "'>" + rule.exampleText;
+        html += "</span>";
+        html += "</div></div>";
+        $("#preview-view .rule-list").append(html);
+    });
+  }
 
   function loadFontOptions(){
     var html = "";
@@ -407,6 +619,9 @@
       html += "<option value='" + font.fontName.family + "|" + font.fontName.style + "'>" + font.fontName.family + " - " + font.fontName.style + "</option>";
     });
     $("#sel-font").html(html);
+
+    $("#current-view").show();
+    $("#loading-fonts").hide();
   }
 
   /* Figma returns bunch of unnecessary/weird system fonts that don't render in browser.
@@ -451,8 +666,18 @@
   
   console.log(event);
   if(event.data.pluginMessage !== undefined){
-    fonts = event.data.pluginMessage;
-    loadFontOptions();
+    if(event.data.pluginMessage.command !== undefined && event.data.pluginMessage.command === "COMMAND.GET_FONTS"){
+      fonts = event.data.pluginMessage.fonts;
+      loadFontOptions();
+    }
+    if(event.data.pluginMessage.command !== undefined && event.data.pluginMessage.command === "COMMAND.SAVE_RULES"){
+            
+    }
+    if(event.data.pluginMessage.command !== undefined && event.data.pluginMessage.command === "COMMAND.GET_RULES"){
+      rules = event.data.pluginMessage.rules;
+      renderRules();
+      renderExamples();
+    }
   }
   
 }

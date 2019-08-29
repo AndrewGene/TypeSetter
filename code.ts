@@ -30,17 +30,40 @@ function clone(val) {
   }
   throw 'unknown'
 }
+
+function sortByNonNullCount(rules){
+  rules.sort(function(a,b){    
+    var aKeys = Object.keys(a);
+    var bKeys = Object.keys(b);
+    var aNonNullKeys = aKeys.filter(function(key){
+        return key !== undefined && key !== null
+    });
+    var bNonNullKeys = bKeys.filter(function(key){
+      return key !== undefined && key !== null
+    });
+    return aNonNullKeys.length < bNonNullKeys.length;
+  });
+  return rules;
+}
+
 // Calls to "parent.postMessage" from within the HTML page will trigger this
 // callback. The callback will be passed the "pluginMessage" property of the
 // posted message.
 figma.ui.onmessage = async(msg) => {
   // One way of distinguishing between different types of messages sent from
   // your HTML page is to use an object with a "type" property like this.
+  var returnMsg = {};
+
   if (msg.type === 'COMMAND.GET_FONTS') {
     var fonts = await figma.listAvailableFontsAsync();
-    figma.ui.postMessage(fonts)
+    returnMsg = {
+      command: msg.type,
+      fonts: fonts
+    }
+    figma.ui.postMessage(returnMsg)    
   }
   if (msg.type === 'COMMAND.SET_TYPE') {    
+    var rules = sortByNonNullCount(msg.rules);
     var allTextNodes = figma.currentPage.findAll((node) => {      
       return node.type === "TEXT"
     });
@@ -50,8 +73,9 @@ figma.ui.onmessage = async(msg) => {
         const fills = clone(textNode.fills);        
         //var nodeFont = (textNode as any).fontName;
         //var textFieldFont = await figma.loadFontAsync(nodeFont);
-        for(var j = 0; j < msg.rules.length; j++){
-            var rule = msg.rules[j];
+        for(var j = 0; j < rules.length; j++){
+            var rule = rules[j];
+            console.log("rule for key count", rule);
             var matchesAllRules = true;
             if (rule.minFontSize !== null && textNodeFontSize < rule.minFontSize){
               matchesAllRules = false;
@@ -74,6 +98,23 @@ figma.ui.onmessage = async(msg) => {
               textNode.fontName = fontName;
             }
         }
+
+        figma.notify("Type Set 👍");
     }
+  }
+  if(msg.type === 'COMMAND.SAVE_RULES'){
+    var setRules = await figma.clientStorage.setAsync("rules", JSON.stringify(msg.rules));
+    returnMsg = {
+      command: msg.type      
+    }
+    figma.ui.postMessage(returnMsg)
+  }
+  if (msg.type === 'COMMAND.GET_RULES'){
+    var rules = await figma.clientStorage.getAsync("rules");
+    returnMsg = {
+      command: msg.type,
+      rules: JSON.parse(rules)
+    }
+    figma.ui.postMessage(returnMsg)
   }
 };

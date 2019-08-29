@@ -44,10 +44,10 @@ function sortByNonNullCount(rules) {
         var aKeys = Object.keys(a);
         var bKeys = Object.keys(b);
         var aNonNullKeys = aKeys.filter(function (key) {
-            return key !== undefined && key !== null;
+            return a[key] !== undefined && a[key] !== null;
         });
         var bNonNullKeys = bKeys.filter(function (key) {
-            return key !== undefined && key !== null;
+            return b[key] !== undefined && b[key] !== null;
         });
         return aNonNullKeys.length < bNonNullKeys.length;
     });
@@ -69,6 +69,7 @@ figma.ui.onmessage = (msg) => __awaiter(this, void 0, void 0, function* () {
         figma.ui.postMessage(returnMsg);
     }
     if (msg.type === 'COMMAND.SET_TYPE') {
+        console.log("applying rules", msg.rules);
         var rules = sortByNonNullCount(msg.rules);
         var allTextNodes = figma.currentPage.findAll((node) => {
             return node.type === "TEXT";
@@ -81,7 +82,7 @@ figma.ui.onmessage = (msg) => __awaiter(this, void 0, void 0, function* () {
             //var textFieldFont = await figma.loadFontAsync(nodeFont);
             for (var j = 0; j < rules.length; j++) {
                 var rule = rules[j];
-                console.log("rule for key count", rule);
+                //console.log("rule for key count", rule);
                 var matchesAllRules = true;
                 if (rule.minFontSize !== null && textNodeFontSize < rule.minFontSize) {
                     matchesAllRules = false;
@@ -91,7 +92,14 @@ figma.ui.onmessage = (msg) => __awaiter(this, void 0, void 0, function* () {
                 }
                 if (rule.fontColor !== null) {
                     var foundColorArray = fills.filter(function (fill) {
-                        return fill.color = rule.fontColor;
+                        if ((Math.abs(fill.color.r - rule.fontColor.r) < 0.0000001) && (Math.abs(fill.color.g - rule.fontColor.g) < 0.0000001) && (Math.abs(fill.color.b - rule.fontColor.b) < 0.0000001)) {
+                            //close enough, tinyColor lib isn't perfect
+                            //console.log("node: " + textNode.name + " matches color from rule", rule.ruleName);
+                            return true;
+                        }
+                        else {
+                            return false;
+                        }
                     });
                     if (foundColorArray.length === 0) {
                         matchesAllRules = false;
@@ -101,10 +109,12 @@ figma.ui.onmessage = (msg) => __awaiter(this, void 0, void 0, function* () {
                     var fontName = { family: rule.fontFamily, style: rule.fontStyle };
                     var font = yield figma.loadFontAsync(fontName);
                     textNode.fontName = fontName;
+                    //console.log("setting node: " + textNode.name + " to rule: " + rule.ruleName);
+                    break;
                 }
             }
-            figma.notify("Type Set 👍");
         }
+        figma.notify("Type Set 👍");
     }
     if (msg.type === 'COMMAND.SAVE_RULES') {
         var setRules = yield figma.clientStorage.setAsync("rules", JSON.stringify(msg.rules));
